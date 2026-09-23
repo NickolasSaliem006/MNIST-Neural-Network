@@ -26,6 +26,23 @@ def forward(X,params):
     cache = {"Z1": Z1, "A1": A1, "Z2": Z2}
     return P, cache
 
+def cross_entropy(P, y):
+    N = P.shape[0]
+    correct = P[np.arange(N), y]
+    return (-np.log(correct + 1e-12).mean())
+
+def backprop(P, Y, N, A1, Z1, params, X):
+    dZ2 = (P-Y)/N
+    dw2 = A1.T @ dZ2
+    db2 = dZ2.sum(axis=0)
+    dA1 = dZ2 @ params["W2"].T
+    dZ1 = dA1 * (Z1 > 0)
+    dw1 = X.T @ dZ1
+    db1 = dZ1.sum(axis=0)
+    cache = {"W2": dw2, "b2": db2, "W1": dw1, "b1" : db1}
+    return cache
+
+
 if __name__ == "__main__":
     from data import load_images, load_labels
     X_train = load_images("data/train-images-idx3-ubyte.gz")
@@ -47,4 +64,7 @@ if __name__ == "__main__":
 
     preds = np.argmax(P,axis=1)
     print("accuracy:", (preds==y).mean())
+
+
+    
 
